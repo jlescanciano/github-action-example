@@ -1,0 +1,24 @@
+{
+  "name": "github-action-example",
+  "version": "1.0.0",
+  "description": "GitHub Action example",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlescanciano/github-action-example.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jlescanciano/github-action-example/issues"
+  },
+  "homepage": "https://github.com/jlescanciano/github-action-example#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^2.1.1"
+  }
+}
