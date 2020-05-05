@@ -12,11 +12,11 @@ try {
   const time = (new Date()).toTimeString();
   core.setOutput("time", time);
   // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
+  const payload = JSON.stringify(github.context.payload, undefined, 2);
   console.log(`The event payload: ${payload}`);
 
-  let result = octokit.pulls.listFiles({owner, repo, pull_number: github.context.payload.number})
-  let changedFiles = result.data.map(file => file.filename)
+  let result = await octokit.pulls.listFiles({owner, repo, pull_number: github.context.payload.number});
+  let changedFiles = result.data.map(file => file.filename);
   console.log(`The files changed: ${changedfiles}`);
 
 } catch (error) {
