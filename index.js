@@ -15,7 +15,7 @@ try {
   const payload = JSON.stringify(github.context.payload, undefined, 2)
   console.log(`The event payload: ${payload}`);
 
-  let result = octokit.pulls.listFiles({owner, repo, pull_number: payload.number})
+  let result = octokit.pulls.listFiles({owner, repo, pull_number: github.context.payload.number})
   let changedFiles = result.data.map(file => file.filename)
   console.log(`The files changed: ${changedfiles}`);
 
