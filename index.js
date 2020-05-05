@@ -7,6 +7,8 @@ async function run() {
     const repositoryToken = core.getInput('repo-token');
     const nameToGreet = core.getInput('who-to-greet');
     const octokit = new github.GitHub(repositoryToken);
+
+
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
     console.log(`Hello ${nameToGreet}!`);
@@ -16,7 +18,10 @@ async function run() {
     const payload = JSON.stringify(github.context.payload, undefined, 2);
     console.log(`The event payload: ${payload}`);
 
-    let result = await octokit.pulls.listFiles({owner, repo, pull_number: github.context.payload.number});
+    let result = await octokit.pulls.listFiles({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      pull_number: github.context.payload.number});
     console.log(JSON.stringify(result, undefined, 2));
     let changedFiles = result.data.map(file => file.filename);
     console.log(`The files changed: ${changedfiles}`);
