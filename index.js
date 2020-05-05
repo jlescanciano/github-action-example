@@ -1,6 +1,16 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
+async function prChangedFiles(ctx, octokit) {
+  let result = await octokit.pulls.listFiles({
+    owner: ctx.repo.owner,
+    repo: ctx.repo.repo,
+    pull_number: ctx.payload.number
+  });
+
+  return result.data.map(file => file.filename);
+}
+
 async function run() {
   try {
     // `repo-token` input defined in action metadata file
@@ -15,12 +25,8 @@ async function run() {
     const payload = JSON.stringify(github.context.payload, undefined, 2);
     console.log(`The event payload: ${payload}`);
 
-    let result = await octokit.pulls.listFiles({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pull_number: github.context.payload.number});
-    console.log(JSON.stringify(result, undefined, 2));
-    let changedFiles = result.data.map(file => file.filename);
+    //Files changed in the PR
+    let changedFiles = await prChangedFiles(github.context, octokit)
     console.log(`The files changed: ${changedFiles}`);
 
   } catch (error) {
