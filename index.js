@@ -14,7 +14,7 @@ async function prChangedFiles(ctx, octokit) {
   return changedFiles.map(file => file.filename)
 }
 
-function teamMembers(ctx, octokit, teams) {
+async function teamMembers(ctx, octokit, teams) {
   // let team_members = octokit.teams.listMembersInOrg({
   //   org: "n26",
   //   team_slug: "techleads"
@@ -118,12 +118,19 @@ async function runAction() {
 
       console.log(ruleset);
 
-      ruleset.approval.forEach(async (ruleSettings) => {
+      let evaluationResults = await Promise.all(ruleset.approval.map(async (ruleSettings) => {
         let rule = new ApprovalPredicate(ruleSettings, octokit);
         let result = await rule.evaluate(github.context);
         console.log(`Evaluation: ${JSON.stringify(result)}`)
-      });
+      }));
 
+      let success = evaluationResults.reduce((acc, result) => acc && result.result, true);
+      if(success) {
+        core.setOutput("evaluated-rules", evaluationResults.length)
+      } else {
+        let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name)
+        core.setFailed(`The following evaluation rules weren't satisfied: ${failedRules}`)
+      }
     } else {
       console.log(`Unsupported event ${currentEventName}`)
     }
