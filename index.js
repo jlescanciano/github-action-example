@@ -1,5 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const fs = require('fs');
+const yaml = require('js-yaml');
 const _ = require('lodash');
 
 const supported_events = ["pull_request", "pull_request_review"];
@@ -40,10 +42,11 @@ const findReviewersByState = (reviews, state) => {
 };
 
 async function prApprovedReviewers(ctx, octokit) {
-  return octokit.paginate(
+  let reviews = await octokit.paginate(
       octokit.pulls.listReviews({repo: ctx.repo.repo, owner: ctx.repo.owner, pull_number: ctx.payload.number}),
-      res => findReviewersByState(res.data, 'approved')
+      res => res.data
   );
+  return findReviewersByState(reviews, 'approved');
 }
 
 async function runAction() {
@@ -55,12 +58,28 @@ async function runAction() {
       const octokit = new github.GitHub(repositoryToken);
 
       // Get the JSON webhook payload for the event that triggered the workflow
-      const payload = JSON.stringify(github.context.payload, undefined, 2);
-      console.log(`The event payload: ${payload}`);
+      // const payload = JSON.stringify(github.context.payload, undefined, 2);
+      // console.log(`The event payload: ${payload}`);
 
       //Files changed in the PR
       let changedFiles = await prChangedFiles(github.context, octokit);
       console.log(`The files changed: ${changedFiles}`);
+
+      console.log("reading the yaml file ...");
+
+      // let path = "/github/workspace/.github/approval.yaml";
+      let path = "./rules.yaml";
+      let fileContents = fs.readFileSync(path, 'utf8');
+      let ruleset = yaml.safeLoad(fileContents);
+
+      console.log(ruleset);
+
+      ruleset.approval.forEach((ruleSettings) => {
+        let rule = new ApprovalPredicate(ruleSettings, null);
+        let result = await (async () => rule.evaluate(null));
+        console.log(`Evaluation: ${JSON.stringify(result)}`)
+      });
+
     } else {
       console.log(`Unsupported event ${currentEventName}`)
     }
@@ -96,7 +115,7 @@ class ApprovalPredicate {
       };
       let requiredTeams = await teamMembers(githubContext, this.octokit, (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : []);
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
-      console.log(`Full reviewers list: ${fullReviewersList}`)
+      console.log(`Full reviewers list: ${fullReviewersList}`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
 
@@ -106,27 +125,6 @@ class ApprovalPredicate {
     }
 
     return { name: this.settings.name, skipped: !doEvaluation, result: evaluationResult };
-  }
-}
-
-async function run() {
-  // load yaml file
-  const fs = require('fs');
-  const yaml = require('js-yaml');
-
-  try {
-    // let path = "/github/workspace/.github/approval.yaml";
-    let path = "./rules.yaml";
-    let fileContents = fs.readFileSync(path, 'utf8');
-    let ruleset = yaml.safeLoad(fileContents);
-    ruleset.approval.forEach((ruleSettings) => {
-        let rule = new ApprovalPredicate(ruleSettings, null);
-        let result = rule.evaluate(null);
-        console.log(`Evaluation: ${JSON.stringify(result)}`)
-    });
-    // console.log(ruleset);
-  } catch (e) {
-    console.log(e);
   }
 }
 
