@@ -49,44 +49,6 @@ async function prApprovedReviewers(ctx, octokit) {
   return findReviewersByState(reviews, 'approved');
 }
 
-async function runAction() {
-  try {
-    let currentEventName = github.context.eventName;
-
-    if(supported_events.includes(currentEventName)){
-      const repositoryToken = core.getInput("repo-token");
-      const octokit = new github.GitHub(repositoryToken);
-
-      // Get the JSON webhook payload for the event that triggered the workflow
-      // const payload = JSON.stringify(github.context.payload, undefined, 2);
-      // console.log(`The event payload: ${payload}`);
-
-      //Files changed in the PR
-      let changedFiles = await prChangedFiles(github.context, octokit);
-      console.log(`The files changed: ${changedFiles}`);
-
-      console.log("reading the yaml file ...");
-
-      let path = "/github/workspace/.github/approval.yaml";
-      let fileContents = fs.readFileSync(path, 'utf8');
-      let ruleset = yaml.safeLoad(fileContents);
-
-      console.log(ruleset);
-
-      ruleset.approval.forEach((ruleSettings) => {
-        let rule = new ApprovalPredicate(ruleSettings, null);
-        let result = await (async () => rule.evaluate(null));
-        console.log(`Evaluation: ${JSON.stringify(result)}`)
-      });
-
-    } else {
-      console.log(`Unsupported event ${currentEventName}`)
-    }
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
 class ApprovalPredicate {
   constructor(rawSettings, octokit) {
     this.settings = rawSettings;
@@ -124,6 +86,44 @@ class ApprovalPredicate {
     }
 
     return { name: this.settings.name, skipped: !doEvaluation, result: evaluationResult };
+  }
+}
+
+async function runAction() {
+  try {
+    let currentEventName = github.context.eventName;
+
+    if(supported_events.includes(currentEventName)){
+      const repositoryToken = core.getInput("repo-token");
+      const octokit = new github.GitHub(repositoryToken);
+
+      // Get the JSON webhook payload for the event that triggered the workflow
+      // const payload = JSON.stringify(github.context.payload, undefined, 2);
+      // console.log(`The event payload: ${payload}`);
+
+      //Files changed in the PR
+      let changedFiles = await prChangedFiles(github.context, octokit);
+      console.log(`The files changed: ${changedFiles}`);
+
+      console.log("reading the yaml file ...");
+
+      let path = "./.github/approval.yaml";
+      let fileContents = fs.readFileSync(path, 'utf8');
+      let ruleset = yaml.safeLoad(fileContents);
+
+      console.log(ruleset);
+
+      ruleset.approval.forEach((ruleSettings) => {
+        let rule = new ApprovalPredicate(ruleSettings, null);
+        let result = await (async () => rule.evaluate(null));
+        console.log(`Evaluation: ${JSON.stringify(result)}`)
+      });
+
+    } else {
+      console.log(`Unsupported event ${currentEventName}`)
+    }
+  } catch (error) {
+    core.setFailed(error.message);
   }
 }
 
