@@ -14,12 +14,12 @@ async function prChangedFiles(ctx, octokit) {
   return changedFiles.map(file => file.filename)
 }
 
-async function teamMembers(ctx, octokit, teams) {
-  // let team_members = octokit.teams.listMembersInOrg({
-  //   org: "n26",
-  //   team_slug: "techleads"
-  // }).data.map(member => (member.id, member.login)); // id: number, login: string
-  return teams.map(team => `${team.org}:${team.slug}`)
+async function teamMembers(ctx, octokit, team) {
+  let members = await octokit.paginate(
+      octokit.teams.listMembersInOrg.endpoint.merge({org: team.org, team_slug: team.slug}),
+      res => res.data
+  );
+  return members.map(member => member.login);
 }
 
 const findReviewersByState = (reviews, state) => {
@@ -28,12 +28,12 @@ const findReviewersByState = (reviews, state) => {
   // See https://developer.github.com/v3/pulls/reviews/#list-reviews-on-a-pull-request
   // While submitting a review requires the states be PENDING, REQUEST_CHANGES, COMMENT and APPROVE
   // The payload actually returns the state in past tense: i.e. APPROVED, COMMENTED
-  const relevantReviews = reviews.filter(element => element.state.toLowerCase() !== 'commented')
+  const relevantReviews = reviews.filter(element => element.state.toLowerCase() !== 'commented');
 
   // order it by date of submission. The docs says the order is chronological but we sort it so that
   // uniqBy will extract the correct last submitted state for the user.
-  const ordered = _.orderBy(relevantReviews, ['submitted_at'], ['desc'])
-  const uniqueByUser = _.uniqBy(ordered, 'user.login')
+  const ordered = _.orderBy(relevantReviews, ['submitted_at'], ['desc']);
+  const uniqueByUser = _.uniqBy(ordered, 'user.login');
 
   // approved reviewers are ones that are approved and not nullified by other submissions later.
   return uniqueByUser
@@ -77,7 +77,11 @@ class ApprovalPredicate {
         let parts = text.split("/", 2);
         return {org: parts[0], slug: parts[1]}
       };
-      let requiredTeams = await teamMembers(githubContext, this.octokit, (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : []);
+
+      let requiredTeams = (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : [];
+      let requiredTeamsAndMembers = await Promise.all(requiredTeams.map(async team => await teamMembers(githubContext, this.octokit, team)));
+      let requiredTeamMembers = requiredTeamsAndMembers.reduce((acc, members) => acc.concat(members));
+
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
       evaluationLog = evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
 
