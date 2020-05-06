@@ -113,11 +113,12 @@ async function runAction() {
 
       console.log(ruleset);
 
-      ruleset.approval.forEach((ruleSettings) => {
+      let evaluationResults = await Promise.all(ruleset.approval.map((ruleSettings) => {
         let rule = new ApprovalPredicate(ruleSettings, null);
-        let result = await (async () => rule.evaluate(null));
-        console.log(`Evaluation: ${JSON.stringify(result)}`)
-      });
+        let result = rule.evaluate(null);
+      }));
+
+      evaluationResults.forEach(result => console.log(`Evaluation: ${JSON.stringify(result)}`));
 
     } else {
       console.log(`Unsupported event ${currentEventName}`)
