@@ -43,7 +43,7 @@ const findReviewersByState = (reviews, state) => {
 
 async function prApprovedReviewers(ctx, octokit) {
   let reviews = await octokit.paginate(
-      octokit.pulls.listReviews({repo: ctx.repo.repo, owner: ctx.repo.owner, pull_number: ctx.payload.number}),
+      octokit.pulls.listReviews.endpoint.merge({repo: ctx.repo.repo, owner: ctx.repo.owner, pull_number: ctx.payload.number}),
       res => res.data
   );
   return findReviewersByState(reviews, 'approved');
