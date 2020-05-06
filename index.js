@@ -56,7 +56,8 @@ class ApprovalPredicate {
   }
 
   async evaluate(githubContext) {
-
+    let ruleName = this.settings.name;
+    console.log(`Evaluating ${ruleName}`);
     let whenClause = this.settings.when;
     let doEvaluation = true;
     if (whenClause && whenClause.fileSetContains) {
@@ -76,16 +77,20 @@ class ApprovalPredicate {
       };
       let requiredTeams = await teamMembers(githubContext, this.octokit, (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : []);
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
-      console.log(`Full reviewers list: ${fullReviewersList}`);
+      console.log(`Required reviewers list: ${fullReviewersList}`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
+      console.log(`Current reviewers who approved the PR: ${currentApprovedReviewers}`)
 
       let requiredReviewersApproving = currentApprovedReviewers.filter(reviewer => fullReviewersList.includes(reviewer));
-      console.log(requiredReviewersApproving);
+      console.log(`Required reviewers who approved the PR: ${requiredReviewersApproving}`);
+
       evaluationResult = requiredReviewersApproving.length >= minApprovals;
+      console.log(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed`)
+      console.log(`Evaluation result: ${evaluationResult}`)
     }
 
-    return { name: this.settings.name, skipped: !doEvaluation, result: evaluationResult };
+    return { name: ruleName, skipped: !doEvaluation, result: evaluationResult };
   }
 }
 
