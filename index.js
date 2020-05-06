@@ -124,10 +124,13 @@ async function runAction() {
         console.log(`Evaluation: ${JSON.stringify(result)}`)
       }));
 
-      let success = evaluationResults.reduce((acc, result) => acc && result.result, true);
+      console.log(`Computing rules results ...`);
+      let success = evaluationResults.reduce((acc, item) => acc && item.result, true);
       if(success) {
+        console.log(`Success!`);
         core.setOutput("evaluated-rules", evaluationResults.length)
       } else {
+        console.log(`Getting failure reasons ...`);
         let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name)
         core.setFailed(`The following evaluation rules weren't satisfied: ${failedRules}`)
       }
