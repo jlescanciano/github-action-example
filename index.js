@@ -1,14 +1,15 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const _ = require('lodash')
+const _ = require('lodash');
 
 const supported_events = ["pull_request", "pull_request_review"];
 
 async function prChangedFiles(ctx, octokit) {
-  return octokit.paginate(
-      octokit.pulls.listFiles({owner: ctx.repo.owner, repo: ctx.repo.repo, pull_number: ctx.payload.number}),
-      res => res.data.map(file => file.filename)
+  let changedFiles = octokit.paginate(
+    octokit.pulls.listFiles({owner: ctx.repo.owner, repo: ctx.repo.repo, pull_number: ctx.payload.number}),
+    res => res.data
   );
+  return changedFiles.map(file => file.filename)
 }
 
 function teamMembers(ctx, octokit, teams) {
