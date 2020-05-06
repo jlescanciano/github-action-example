@@ -67,8 +67,7 @@ async function runAction() {
 
       console.log("reading the yaml file ...");
 
-      // let path = "/github/workspace/.github/approval.yaml";
-      let path = "./rules.yaml";
+      let path = "/github/workspace/.github/approval.yaml";
       let fileContents = fs.readFileSync(path, 'utf8');
       let ruleset = yaml.safeLoad(fileContents);
 
