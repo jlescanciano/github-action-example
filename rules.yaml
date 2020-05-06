@@ -1,0 +1,18 @@
+approval:
+  - name: "Required approval for live section"
+    min:
+      count: 2
+    when:
+      fileSetContains: "^live\/"
+    required:
+      reviewers: ["dlewis", "n26:techleads"]
+      teams: [ "n26/techleads" ]
+  - name: "Required approval for proposal section"
+    min:
+      count: 2
+    when:
+      fileSetContains: "^prop\/"
+    required:
+      reviewers: []
+      teams: []
+
