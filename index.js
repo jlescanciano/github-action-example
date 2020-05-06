@@ -80,7 +80,7 @@ class ApprovalPredicate {
 
       let requiredTeams = (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : [];
       let requiredTeamsAndMembers = await Promise.all(requiredTeams.map(async team => await teamMembers(githubContext, this.octokit, team)));
-      let requiredTeamMembers = requiredTeamsAndMembers.reduce((acc, members) => acc.concat(members));
+      let requiredTeamMembers = requiredTeamsAndMembers.reduce((acc, members) => acc.concat(members), []);
 
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
       evaluationLog = evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
