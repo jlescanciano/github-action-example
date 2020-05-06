@@ -5,7 +5,7 @@ const _ = require('lodash');
 const supported_events = ["pull_request", "pull_request_review"];
 
 async function prChangedFiles(ctx, octokit) {
-  let changedFiles = octokit.paginate(
+  let changedFiles = await octokit.paginate(
     octokit.pulls.listFiles.endpoint.merge({owner: ctx.repo.owner, repo: ctx.repo.repo, pull_number: ctx.payload.number}),
     res => res.data
   );
