@@ -118,10 +118,10 @@ async function runAction() {
 
       console.log(ruleset);
 
-      let evaluationResults = await Promise.all(ruleset.approval.map(async (ruleSettings) => {
-        let rule = new ApprovalPredicate(ruleSettings, octokit);
-        await rule.evaluate(github.context);
-      }));
+      let evaluationResults = await Promise.all(ruleset.approval
+        .map(ruleSettings => new ApprovalPredicate(ruleSettings, octokit))
+        .map(async rule => await rule.evaluate(github.context))
+      );
 
       console.log(`Computing rules results ... ${evaluationResults}`);
       let success = evaluationResults.reduce((acc, item) => acc && item.result, true);
@@ -130,7 +130,7 @@ async function runAction() {
         core.setOutput("evaluated-rules", evaluationResults.length)
       } else {
         console.log(`Getting failure reasons ...`);
-        let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name)
+        let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name);
         core.setFailed(`The following evaluation rules weren't satisfied: ${failedRules}`)
       }
     } else {
