@@ -58,7 +58,7 @@ class ApprovalPredicate {
   async evaluate(githubContext) {
     let evaluationLog = "";
     let ruleName = this.settings.name;
-    evaluationLog.concat(`Evaluating ${ruleName}\n`);
+    evaluationLog = evaluationLog.concat(`Evaluating ${ruleName}\n`);
 
     let whenClause = this.settings.when;
     let doEvaluation = true;
@@ -79,17 +79,17 @@ class ApprovalPredicate {
       };
       let requiredTeams = await teamMembers(githubContext, this.octokit, (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : []);
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
-      evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
+      evaluationLog = evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
-      evaluationLog.concat(`Current reviewers who approved the PR: ${currentApprovedReviewers}\n`);
+      evaluationLog = evaluationLog.concat(`Current reviewers who approved the PR: ${currentApprovedReviewers}\n`);
 
       let requiredReviewersApproving = currentApprovedReviewers.filter(reviewer => fullReviewersList.includes(reviewer));
-      evaluationLog.concat(`Required reviewers who approved the PR: ${requiredReviewersApproving}\n`);
+      evaluationLog = evaluationLog.concat(`Required reviewers who approved the PR: ${requiredReviewersApproving}\n`);
 
       evaluationResult = requiredReviewersApproving.length >= minApprovals;
-      evaluationLog.concat(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed\n`);
-      evaluationLog.concat(`Evaluation result: ${evaluationResult}\n`);
+      evaluationLog = evaluationLog.concat(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed\n`);
+      evaluationLog = evaluationLog.concat(`Evaluation result: ${evaluationResult}\n`);
     }
 
     console.log(evaluationLog);
