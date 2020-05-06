@@ -118,10 +118,10 @@ async function runAction() {
 
       console.log(ruleset);
 
-      let evaluationResults = await Promise.all(ruleset.approval.map(async (ruleSettings) => {
+      let evaluationResults = ruleset.approval.map(async (ruleSettings) => {
         let rule = new ApprovalPredicate(ruleSettings, octokit);
         await rule.evaluate(github.context);
-      }));
+      });
 
       console.log(`Computing rules results ...`);
       let success = evaluationResults.reduce((acc, item) => acc && item.result, true);
