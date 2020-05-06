@@ -113,12 +113,11 @@ async function runAction() {
 
       console.log(ruleset);
 
-      let evaluationResults = await Promise.all(ruleset.approval.map((ruleSettings) => {
+      ruleset.approval.forEach(async (ruleSettings) => {
         let rule = new ApprovalPredicate(ruleSettings, octokit);
-        let result = rule.evaluate(github.context);
-      }));
-
-      evaluationResults.forEach(result => console.log(`Evaluation: ${JSON.stringify(result)}`));
+        let result = await rule.evaluate(github.context);
+        console.log(`Evaluation: ${JSON.stringify(result)}`)
+      });
 
     } else {
       console.log(`Unsupported event ${currentEventName}`)
