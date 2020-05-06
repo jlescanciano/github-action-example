@@ -120,8 +120,7 @@ async function runAction() {
 
       let evaluationResults = await Promise.all(ruleset.approval.map(async (ruleSettings) => {
         let rule = new ApprovalPredicate(ruleSettings, octokit);
-        let result = await rule.evaluate(github.context);
-        console.log(`Evaluation: ${JSON.stringify(result)}`)
+        await rule.evaluate(github.context);
       }));
 
       console.log(`Computing rules results ...`);
