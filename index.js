@@ -114,8 +114,6 @@ async function runAction() {
       let fileContents = fs.readFileSync(path, 'utf8');
       let ruleset = yaml.safeLoad(fileContents);
 
-      console.log(ruleset);
-
       let evaluationResults = await Promise.all(ruleset.approval
         .map(ruleSettings => new ApprovalPredicate(ruleSettings, octokit))
         .map(async rule => await rule.evaluate(github.context))
