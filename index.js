@@ -56,8 +56,10 @@ class ApprovalPredicate {
   }
 
   async evaluate(githubContext) {
+    let evaluationLog = "";
     let ruleName = this.settings.name;
-    console.log(`Evaluating ${ruleName}`);
+    evaluationLog.concat(`Evaluating ${ruleName}\n`);
+
     let whenClause = this.settings.when;
     let doEvaluation = true;
     if (whenClause && whenClause.fileSetContains) {
@@ -77,18 +79,20 @@ class ApprovalPredicate {
       };
       let requiredTeams = await teamMembers(githubContext, this.octokit, (this.settings.required && this.settings.required.teams) ? this.settings.required.teams.map(extractGitHubTeam) : []);
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
-      console.log(`Required reviewers list: ${fullReviewersList}`);
+      evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
-      console.log(`Current reviewers who approved the PR: ${currentApprovedReviewers}`)
+      evaluationLog.concat(`Current reviewers who approved the PR: ${currentApprovedReviewers}\n`);
 
       let requiredReviewersApproving = currentApprovedReviewers.filter(reviewer => fullReviewersList.includes(reviewer));
-      console.log(`Required reviewers who approved the PR: ${requiredReviewersApproving}`);
+      evaluationLog.concat(`Required reviewers who approved the PR: ${requiredReviewersApproving}\n`);
 
       evaluationResult = requiredReviewersApproving.length >= minApprovals;
-      console.log(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed`)
-      console.log(`Evaluation result: ${evaluationResult}`)
+      evaluationLog.concat(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed\n`);
+      evaluationLog.concat(`Evaluation result: ${evaluationResult}\n`);
     }
+
+    console.log(evaluationLog);
 
     return { name: ruleName, skipped: !doEvaluation, result: evaluationResult };
   }
@@ -102,16 +106,6 @@ async function runAction() {
       const repositoryToken = core.getInput("repo-token");
       const octokit = new github.GitHub(repositoryToken);
 
-      // Get the JSON webhook payload for the event that triggered the workflow
-      // const payload = JSON.stringify(github.context.payload, undefined, 2);
-      // console.log(`The event payload: ${payload}`);
-
-      //Files changed in the PR
-      let changedFiles = await prChangedFiles(github.context, octokit);
-      console.log(`The files changed: ${changedFiles}`);
-
-      console.log("reading the yaml file ...");
-
       let path = "./.github/approval.yaml";
       let fileContents = fs.readFileSync(path, 'utf8');
       let ruleset = yaml.safeLoad(fileContents);
@@ -123,13 +117,11 @@ async function runAction() {
         .map(async rule => await rule.evaluate(github.context))
       );
 
-      console.log(`Computing rules results ... ${evaluationResults}`);
       let success = evaluationResults.reduce((acc, item) => acc && item.result, true);
       if(success) {
         console.log(`Success!`);
         core.setOutput("evaluated-rules", evaluationResults.length)
       } else {
-        console.log(`Getting failure reasons ...`);
         let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name);
         core.setFailed(`The following evaluation rules weren't satisfied: ${failedRules}`)
       }
