@@ -16,10 +16,16 @@ async function prChangedFiles(ctx, octokit) {
 }
 
 async function teamMembers(ctx, octokit, team) {
-  let members = await octokit.paginate(
-      octokit.teams.listMembersInOrg.endpoint.merge({org: team.org, team_slug: team.slug}),
-      res => res.data
-  );
+  let members = [];
+  try {
+    members = await octokit.paginate(
+        octokit.teams.listMembersInOrg.endpoint.merge({org: team.org, team_slug: team.slug}),
+        res => res.data
+    );
+  } catch(error) {
+    console.log(`Error requesting team members for ${team}`);
+    members = [ {login: $team} ];
+  }
   return members.map(member => member.login);
 }
 
