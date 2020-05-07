@@ -90,10 +90,10 @@ class ApprovalPredicate {
       let requiredTeamMembers = requiredTeamsAndMembers.reduce((acc, members) => acc.concat(members), []);
 
       let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
-      evaluationLog = evaluationLog.concat(`Required reviewers list: ${fullReviewersList}\n`);
+      evaluationLog = evaluationLog.concat(`Required reviewers list: ${JSON.stringify(fullReviewersList, null, 2)}\n`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
-      evaluationLog = evaluationLog.concat(`Current reviewers who approved the PR: ${currentApprovedReviewers}\n`);
+      evaluationLog = evaluationLog.concat(`Current reviewers who approved the PR: ${JSON.stringify(currentApprovedReviewers, null, 2)}\n`);
 
       let requiredReviewersApproving = currentApprovedReviewers.filter(reviewer => fullReviewersList.includes(reviewer));
       evaluationLog = evaluationLog.concat(`Required reviewers who approved the PR: ${requiredReviewersApproving}\n`);
@@ -112,13 +112,11 @@ class ApprovalPredicate {
 async function runAction() {
   try {
     console.log('Action initialized ...');
-    console.log(`Handling event ${JSON.stringify(github.context.payload, undefined, 2)}`);
-    console.log("---");
 
     let currentEventName = github.context.eventName;
 
     if(supported_events.includes(currentEventName)){
-      console.log('Loading Octokit ...')
+      console.log('Loading Octokit ...\n');
       const repositoryToken = core.getInput('token');
       const octokit = new github.GitHub(repositoryToken);
 
@@ -130,7 +128,7 @@ async function runAction() {
       // console.log(`Loading rules from ${rulesFile}`)
       // let fileContents = fs.readFileSync(rulesFile, 'utf8');
       // let ruleset = yaml.safeLoad(fileContents);
-      console.log("Loading rules ...")
+      console.log('Loading rules ...\n');
       let rulesParam = core.getInput('rules');
       let ruleset = yaml.safeLoad(rulesParam);
 
