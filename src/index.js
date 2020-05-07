@@ -145,6 +145,7 @@ async function runAction() {
       console.log(`Unsupported event ${currentEventName}`)
     }
   } catch (error) {
+    console.log(error.stack);
     core.setFailed(error.message);
   }
 }
