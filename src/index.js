@@ -111,7 +111,7 @@ async function runAction() {
     let currentEventName = github.context.eventName;
 
     if(supported_events.includes(currentEventName)){
-      const repositoryToken = core.getInput("repo-token");
+      const repositoryToken = core.getInput("token");
       const octokit = new github.GitHub(repositoryToken);
 
       let path = "./.github/approval.yaml";

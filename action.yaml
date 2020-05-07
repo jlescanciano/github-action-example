@@ -1,9 +1,9 @@
 name: 'Approvals'
 description: 'Watch out for required approvals'
 inputs:
-  repo-token:
+  token:
     description: Repository token
-    required: true
+    default: ${{ github.token }}
 outputs:
   evaluated-rules:
     description: 'Number of evaluated rules'
