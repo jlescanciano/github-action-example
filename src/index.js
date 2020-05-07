@@ -104,6 +104,10 @@ class ApprovalPredicate {
 
 async function runAction() {
   try {
+    console.log("Action initialized ...");
+    console.log(`Handling event ${JSON.stringify(github.context.payload, undefined, 2)}`);
+    console.log("---");
+
     let currentEventName = github.context.eventName;
 
     if(supported_events.includes(currentEventName)){
