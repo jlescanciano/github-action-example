@@ -23,7 +23,7 @@ async function teamMembers(ctx, octokit, team) {
         res => res.data
     );
   } catch(error) {
-    console.log(`Error requesting team members for ${team.org}/${team.slug}`);
+    console.error(`Error requesting team members for ${team.org}/${team.slug}`);
     members = [ {login: `${team.org}/${team.slug}`} ];
   }
   return members.map(member => member.login);
