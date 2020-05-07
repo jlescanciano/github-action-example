@@ -16,7 +16,8 @@ async function prChangedFiles(ctx, octokit) {
 }
 
 async function teamMembers(ctx, octokit, team) {
-  let members = [];
+  // Default members is team itself prepended with @ so such member can't exist
+  let members = [ {login: `@${team.org}/${team.slug}`} ];
   try {
     members = await octokit.paginate(
         octokit.teams.listMembersInOrg.endpoint.merge({org: team.org, team_slug: team.slug}),
@@ -24,7 +25,6 @@ async function teamMembers(ctx, octokit, team) {
     );
   } catch(error) {
     console.error(`Error requesting team members for ${team.org}/${team.slug}`);
-    members = [ {login: `${team.org}/${team.slug}`} ];
   }
   return members.map(member => member.login);
 }
