@@ -4,6 +4,9 @@ inputs:
   token:
     description: Repository token
     default: ${{ github.token }}
+  rules:
+    description: Approval rules
+    required: true
 outputs:
   evaluated-rules:
     description: 'Number of evaluated rules'

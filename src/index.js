@@ -105,7 +105,7 @@ class ApprovalPredicate {
 
 async function runAction() {
   try {
-    console.log("Action initialized ...");
+    console.log('Action initialized ...');
     console.log(`Handling event ${JSON.stringify(github.context.payload, undefined, 2)}`);
     console.log("---");
 
@@ -113,17 +113,20 @@ async function runAction() {
 
     if(supported_events.includes(currentEventName)){
       console.log('Loading Octokit ...')
-      const repositoryToken = core.getInput("token");
+      const repositoryToken = core.getInput('token');
       const octokit = new github.GitHub(repositoryToken);
 
-      let githubWorkspace = process.env['GITHUB_WORKSPACE'];
-      if(!githubWorkspace) {
-        throw new Error('GITHUB_WORKSPACE not defined')
-      }
-      let rulesFile = path.resolve(githubWorkspace.concat(path.sep).concat(".github/approval.yaml"));
-      console.log(`Loading rules from ${rulesFile}`)
-      let fileContents = fs.readFileSync(rulesFile, 'utf8');
-      let ruleset = yaml.safeLoad(fileContents);
+      // let githubWorkspace = process.env['GITHUB_WORKSPACE'];
+      // if(!githubWorkspace) {
+      //   throw new Error('GITHUB_WORKSPACE not defined')
+      // }
+      // let rulesFile = path.resolve(githubWorkspace.concat(path.sep).concat(".github/approval.yaml"));
+      // console.log(`Loading rules from ${rulesFile}`)
+      // let fileContents = fs.readFileSync(rulesFile, 'utf8');
+      // let ruleset = yaml.safeLoad(fileContents);
+      console.log("Loading rules ...")
+      let rulesParam = core.getInput('rules');
+      let ruleset = yaml.safeLoad(rulesParam);
 
       let evaluationResults = await Promise.all(ruleset.approval
         .map(ruleSettings => new ApprovalPredicate(ruleSettings, octokit))
