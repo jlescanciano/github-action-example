@@ -1,12 +1,12 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Approvals'
+description: 'Watch out for required approvals'
 inputs:
   repo-token:
     description: Repository token
     required: true
 outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+  evaluated-rules:
+    description: 'Number of evaluated rules'
 runs:
   using: 'node12'
   main: 'index.js'
