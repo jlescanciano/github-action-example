@@ -6,9 +6,5 @@ module.exports = {
         path: path.join(__dirname, 'dist'),
         filename: 'action.[hash].js'
     },
-    node: {
-        fs: 'empty',
-        net: 'empty',
-        tls: 'empty'
-    }
+    target: 'node'
 }
