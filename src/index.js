@@ -3,6 +3,7 @@ const github = require('@actions/github');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('lodash');
+const path = require('path');
 
 const supported_events = ["pull_request", "pull_request_review"];
 
@@ -111,11 +112,17 @@ async function runAction() {
     let currentEventName = github.context.eventName;
 
     if(supported_events.includes(currentEventName)){
+      console.log('Loading Octokit ...')
       const repositoryToken = core.getInput("token");
       const octokit = new github.GitHub(repositoryToken);
 
-      let path = "./.github/approval.yaml";
-      let fileContents = fs.readFileSync(path, 'utf8');
+      let githubWorkspace = process.env['GITHUB_WORKSPACE'];
+      if(!githubWorkspace) {
+        throw new Error('GITHUB_WORKSPACE not defined')
+      }
+      let rulesFile = path.resolve(githubWorkspace.concat(path.sep).concat(".github/approval.yaml"));
+      console.log(`Loading rules from ${rulesFile}`)
+      let fileContents = fs.readFileSync(rulesFile, 'utf8');
       let ruleset = yaml.safeLoad(fileContents);
 
       let evaluationResults = await Promise.all(ruleset.approval
