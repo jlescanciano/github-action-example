@@ -143,7 +143,7 @@ async function runAction() {
         core.setOutput("evaluated-rules", evaluationResults.length)
       } else {
         let failedRules = evaluationResults.filter(result => !result.result).map(result => result.name);
-        core.setFailed(`The following evaluation rules weren't satisfied: ${failedRules}`)
+        core.setFailed(`The following evaluation rules weren't satisfied: ${JSON.stringify(failedRules, null, 2)}`)
       }
     } else {
       console.log(`Unsupported event ${currentEventName}`)
