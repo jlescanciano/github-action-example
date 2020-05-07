@@ -1,0 +1,14 @@
+const path = require("path");
+
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        path: path.join(__dirname, 'dist'),
+        filename: 'action.[hash].js'
+    },
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    }
+}
