@@ -89,21 +89,21 @@ class ApprovalPredicate {
       let requiredTeamsAndMembers = await Promise.all(requiredTeams.map(async team => await teamMembers(githubContext, this.octokit, team)));
       let requiredTeamMembers = requiredTeamsAndMembers.reduce((acc, members) => acc.concat(members), []);
 
-      let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeams));
+      let fullReviewersList = _.uniq(requiredReviewers.concat(requiredTeamMembers));
       evaluationLog = evaluationLog.concat(`Required reviewers list: ${JSON.stringify(fullReviewersList, null, 2)}\n`);
 
       let currentApprovedReviewers = await prApprovedReviewers(githubContext, this.octokit);
       evaluationLog = evaluationLog.concat(`Current reviewers who approved the PR: ${JSON.stringify(currentApprovedReviewers, null, 2)}\n`);
 
       let requiredReviewersApproving = currentApprovedReviewers.filter(reviewer => fullReviewersList.includes(reviewer));
-      evaluationLog = evaluationLog.concat(`Required reviewers who approved the PR: ${requiredReviewersApproving}\n`);
+      evaluationLog = evaluationLog.concat(`Required reviewers who approved the PR: ${JSON.stringify(requiredReviewersApproving, null, 2)}\n`);
 
       evaluationResult = requiredReviewersApproving.length >= minApprovals;
       evaluationLog = evaluationLog.concat(`Got (${requiredReviewersApproving.length}) required reviewers approving of (${minApprovals}) needed\n`);
-      evaluationLog = evaluationLog.concat(`Evaluation result: ${evaluationResult}\n`);
+      evaluationLog = evaluationLog.concat(`Evaluation result: ${evaluationResult}`);
     }
 
-    console.log(evaluationLog);
+    console.log(`\n---\n${evaluationLog}\n---\n`);
 
     return { name: ruleName, skipped: !doEvaluation, result: evaluationResult };
   }
