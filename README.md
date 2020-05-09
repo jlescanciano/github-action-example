@@ -1,21 +1,56 @@
-# Hello world javascript action
+# Approval Check Github Action
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This action checks for approvals on PRs
 
 ## Inputs
 
-### `who-to-greet`
+### `token`
 
-**Required** The name of the person to greet. Default `"World"`.
+Token to use for the Github integration. Default `${{ github.token }}`.
+
+### `rules`
+
+Rules to check on PRs
+
+```yaml
+approval:
+  - name: "Required approvals for whatever"
+    min:
+      count: 1
+    when:
+      fileSetContains: "^."
+    required:
+      reviewers: ["reviewer1"]
+      teams: ["org/team1"]
+  - name: "Required approvals for something else"
+      min:
+        count: 3
+      when:
+        fileSetContains: "^."
+      required:
+        reviewers: ["reviewer2"]
+        teams: ["org/team2"]
+```
 
 ## Outputs
 
-### `time`
+### `evaluated-rules`
 
-The time we greeted you.
+Number of evaluated (not skipped) rules.
 
 ## Example usage
 
-uses: actions/hello-world-javascript-action@v1
+```yaml
+uses: jlescanciano/github-action-example@v1.1
 with:
-  who-to-greet: 'Mona the Octocat'
+  rules: >
+    approval:
+      - name: "Required approvals for whatever"
+        min:
+          count: 2
+        when:
+          fileSetContains: "^."
+        required:
+          reviewers: ["reviewer1"]
+          teams: ["org/team"]
+```

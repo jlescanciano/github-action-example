@@ -1,11 +1,16 @@
 {
-  "name": "github-action-example",
+  "name": "typescript-webpack-example",
   "version": "1.0.0",
-  "description": "GitHub Action example",
-  "main": "index.js",
+  "description": "typescript webpack example",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack src/index.js -o dist/action.js"
+    "build": "tsc",
+    "format": "prettier --write src/**/*.ts",
+    "format-check": "prettier --check src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
+    "pack": "ncc build",
+    "test": "jest",
+    "all": "npm run build && npm run format && npm run lint && npm run pack"
   },
   "repository": {
     "type": "git",
@@ -13,19 +18,30 @@
   },
   "keywords": [],
   "author": "jlescanciano",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jlescanciano/github-action-example/issues"
   },
   "homepage": "https://github.com/jlescanciano/github-action-example#readme",
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@actions/github": "^2.1.1",
-    "js-yaml": "^3.13.1",
-    "lodash": "^4.17.15"
+    "@actions/github": "^2.1.1"
   },
   "devDependencies": {
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "@types/js-yaml": "^3.12.3",
+    "@types/lodash": "^4.14.150",
+    "@types/node": "^13.13.5",
+    "@types/jest": "^24.0.23",
+    "@typescript-eslint/parser": "^2.8.0",
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^5.16.0",
+    "eslint-plugin-github": "^2.0.0",
+    "eslint-plugin-jest": "^22.21.0",
+    "jest": "^24.9.0",
+    "jest-circus": "^24.9.0",
+    "js-yaml": "^3.13.1",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.6.4"
   }
 }
