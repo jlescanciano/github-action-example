@@ -121,14 +121,6 @@ async function runAction() {
       const repositoryToken = core.getInput('token');
       const octokit = new github.GitHub(repositoryToken);
 
-      // let githubWorkspace = process.env['GITHUB_WORKSPACE'];
-      // if(!githubWorkspace) {
-      //   throw new Error('GITHUB_WORKSPACE not defined')
-      // }
-      // let rulesFile = path.resolve(githubWorkspace.concat(path.sep).concat(".github/approval.yaml"));
-      // console.log(`Loading rules from ${rulesFile}`)
-      // let fileContents = fs.readFileSync(rulesFile, 'utf8');
-      // let ruleset = yaml.safeLoad(fileContents);
       console.log('Loading rules ...\n');
       let rulesParam = core.getInput('rules');
       let ruleset = yaml.safeLoad(rulesParam);
